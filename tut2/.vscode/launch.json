@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "amiga",
+            "request": "launch",
+            "preLaunchTask": "compile",
+            "name": "Blabla",
+            "program": "${workspaceFolder}/a.mingw",
+            "kickstart": "C:/Users/specc/Documents/FS-UAE/Kickstarts/Kickstart 1.3 A500.rom",
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}

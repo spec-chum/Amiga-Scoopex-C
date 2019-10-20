@@ -1,0 +1,6 @@
+/ASMSKOOL1-21
+obj8mingw/
+*.elf
+*.exe
+*.map
+*.s
