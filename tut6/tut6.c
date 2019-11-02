@@ -13,18 +13,16 @@
 #include <hardware/custom.h>
 #include <graphics/gfxbase.h>
 
+#include "../headers/structs.h"
 #include "../headers/custom_defines.h"
 #include "../headers/helpers.h"
 
 #define WAITRAS1 28
 #define WAITRAS2 36
 
-struct ExecBase *SysBase;
 struct GfxBase *GfxBase;
 struct copinit *oldCopinit;
 
-volatile struct Custom *custom = (struct Custom *)0xdff000;
-volatile struct CIA *ciaa  = (struct CIA *)0xbfe001;
 
 /*	__attribute__((section("tut.MEMF_CHIP")))	
 	seems to set the section as readonly	*/
@@ -88,9 +86,9 @@ int main()
 	while(ciaa->ciapra & CIAF_GAMEPORT0)
 	{
 		// wait for start of frame - wframe
-		if((custom->vposr & 1) == 0 && HIBYTE(custom->vhposr) == 0x2a)
+		if((GETBYTE_LO(custom->vposr) & 1) == 0 && GETBYTE_HI(custom->vhposr) == 0x2a)
 		{
-			while(HIBYTE(custom->vhposr) == 0x2a)
+			while(GETBYTE_HI(custom->vhposr) == 0x2a)
 			{ } // wframe2
 			
 			// update line y position

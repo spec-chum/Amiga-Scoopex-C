@@ -13,14 +13,11 @@
 #include <hardware/custom.h>
 #include <graphics/gfxbase.h>
 
+#include "../headers/structs.h"
 #include "../headers/helpers.h"
 
-struct ExecBase *SysBase;
 struct GfxBase *GfxBase;
 struct copinit *oldCopinit;
-
-volatile struct Custom *custom = (struct Custom *)0xdff000;
-volatile struct CIA *ciaa  = (struct CIA *)0xbfe001;
 
 __attribute__((section("tut.MEMF_CHIP"))) UWORD copperlist[] =
 {
@@ -57,7 +54,7 @@ int main()
 	while(ciaa->ciapra & CIAF_GAMEPORT0)
 	{
 		// wait for start of frame
-		if((custom->vposr & 1) == 0 && HIBYTE(custom->vhposr) == 0x2c)
+		if((GETBYTE_LO(custom->vposr) & 1) == 0 && GETBYTE_HI(custom->vhposr) == 0x2c)
 		{
 			custom->color[0] = 0;	// bg black
 
@@ -71,12 +68,12 @@ int main()
 			}
 
 			// do literally nothing until we reach yPos
-			while(HIBYTE(custom->vhposr) != yPos)
+			while(GETBYTE_HI(custom->vhposr) != yPos)
 			{}
 			custom->color[0] = 0xfff;	// bg white
 
 			// now do nothing until we're not on yPos
-			while(HIBYTE(custom->vhposr) == yPos)
+			while(GETBYTE_HI(custom->vhposr) == yPos)
 			{}
 			custom->color[0] = 0;	// bg black
 		}

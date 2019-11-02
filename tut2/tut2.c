@@ -10,13 +10,8 @@
 #include <hardware/cia.h>
 #include <hardware/custom.h>
 
+#include "../headers/structs.h"
 #include "../headers/helpers.h"
-
-// Not used here, but needed by GCC 8
-struct ExecBase *SysBase;
-
-volatile struct Custom *custom = (struct Custom *)0xdff000;
-volatile struct CIA *ciaa  = (struct CIA *)0xbfe001;
 
 int main()
 {
@@ -24,12 +19,12 @@ int main()
 	while(ciaa->ciapra & CIAF_GAMEPORT0)
 	{
 		// do literally nothing until we reach yPos 0xac
-		while(HIBYTE(custom->vhposr) != 0xac)
+		while(GETBYTE_HI(custom->vhposr) != 0xac)
 		{}
 		custom->color[0] = 0xfff;	// bg white
 
 		// now do nothing until we're not on yPos 0xac
-		while(HIBYTE(custom->vhposr) == 0xac)
+		while(GETBYTE_HI(custom->vhposr) == 0xac)
 		{}
 		custom->color[0] = 0x116;	// bg blue
 	}
