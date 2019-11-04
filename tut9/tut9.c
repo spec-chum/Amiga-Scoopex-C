@@ -19,7 +19,7 @@
 #include "../headers/helpers.h"
 
 #define WAITRAS1 37 * 4
-#define SPRP 12 * 4
+#define SPRP 12 * 2
 
 #define SCREEN 0x60000
 #define W 320
@@ -63,9 +63,7 @@ __attribute__((section("tut.MEMF_CHIP"))) UWORD nullSpr[] =
 	0, 0
 };
 
-/*	__attribute__((section("tut.MEMF_CHIP")))	
-	seems to set the section as readonly	*/
-UWORD copperlist[] =
+__attribute__((section("tut.MEMF_CHIP"))) UWORD copperlist[] =
 {
 	CMOVE(FMODE, 0),			// set FMODE to slow for AGA
 	CMOVE(BPLCON0, 0x0200),		// no bitplanes, but need color burst
@@ -173,10 +171,6 @@ int main()
 {
 	SysBase = *((struct ExecBase**)4L);
 
-	// place our copperlist in chipmem
-	UBYTE *clptr = AllocMem(sizeof(copperlist), MEMF_CHIP);
-	CopyMem(copperlist, clptr, sizeof(copperlist));
-
 	// open gfx lib and save original copperlist
 	GfxBase = (struct GfxBase*)OldOpenLibrary("graphics.library");
 	oldCopinit = GfxBase->copinit;
@@ -198,7 +192,7 @@ int main()
 	// disable all interrupts and DMA
 	custom->intena = 0x7fff;
 	custom->intreq = 0x7fff;
-	custom->intreq = 0x7fff;
+	custom->intreq = 0x7fff;	// needed twice?  Works fine with 1
 	custom->dmacon = 0x7fff;
 
 	// set required bits of DMA (0x87e0)
@@ -211,19 +205,19 @@ int main()
 	}
 
 	// set actual sprite pointer
-	((UWORD *)clptr)[(SPRP / 2) + 1] = (ULONG)spr >> 16;
-	((UWORD *)clptr)[(SPRP / 2) + 3] = (ULONG)spr & 0xffff;
+	copperlist[SPRP + 1] = (ULONG)spr >> 16;
+	copperlist[SPRP + 3] = (ULONG)spr & 0xffff;
 
 	// set others to nullSpr so they don't display
-	for(int index = 0; index < 7; index++)
+	for(UWORD index = 0; index < 7; index++)
 	{
 		// looks complex but gets compiled into 2 single move.w instructions per loop
-		((UWORD *)clptr)[((SPRP / 2) + (index * 4) + 5)] = (ULONG)nullSpr >> 16;
-		((UWORD *)clptr)[((SPRP / 2) + (index * 4) + 7)] = (ULONG)nullSpr & 0xffff;
+		copperlist[(SPRP + (index * 4) + 5)] = (ULONG)nullSpr >> 16;
+		copperlist[(SPRP + (index * 4) + 7)] = (ULONG)nullSpr & 0xffff;
 	}
 
 	// initiate our copper
-	custom->cop1lc = (ULONG)clptr;
+	custom->cop1lc = (ULONG)copperlist;
 
 	// loop until mouse clicked
 	while(ciaa->ciapra & CIAF_GAMEPORT0)
@@ -249,7 +243,7 @@ int main()
 			// dynamically update all waitras values
 			for(UWORD waitras = 0; waitras < 6; waitras++)
 			{
-				clptr[WAITRAS1 + (waitras * 8)] = yPos + waitras;
+				((UBYTE *)copperlist)[WAITRAS1 + (waitras * 8)] = yPos + waitras;
 			}
 		}
 	}
@@ -260,9 +254,6 @@ int main()
 
 	// restore original copper
 	custom->cop1lc = (ULONG)oldCopinit;
-
-	// free copperlist memory
-	FreeMem(clptr, sizeof(copperlist));
 
 	// restore interrupts
 	custom->intena = oldInt | 0xc000;
