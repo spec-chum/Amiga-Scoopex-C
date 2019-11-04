@@ -13,7 +13,7 @@ objects := $(addprefix obj8mingw/,$(patsubst %.c,%.o,$(notdir $(sources))))
 OUT = a.mingw
 CC = m68k-amiga-elf-gcc
 
-CCFLAGS = -g -MP -MMD -m68000 -O1 -nostdlib -Wall -Wno-pointer-sign -Wno-unused-function -Wno-volatile-register-var -Wno-discarded-qualifiers -fomit-frame-pointer -fno-tree-loop-distribution -flto -fwhole-program
+CCFLAGS = -g -MP -MMD -m68000 -Ofast -nostdlib -Wall -Wno-pointer-sign -Wno-unused-function -Wno-volatile-register-var -Wno-discarded-qualifiers -fomit-frame-pointer -fno-tree-loop-distribution -flto -fwhole-program
 ASFLAGS = -Wa,-g
 LDFLAGS = -Wl,--emit-relocs,-Ttext=0,-Map=$(OUT).map
 

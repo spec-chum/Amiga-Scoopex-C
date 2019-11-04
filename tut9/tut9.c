@@ -229,7 +229,7 @@ int main()
 			{ } // wframe2
 
 			// move sprite
-			((UBYTE *)spr)[1]++;
+			((volatile UBYTE *)spr)[1]++;
 			
 			// update line y position
 			yPos += yDir;
